@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Parkinson Disease Detection</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+
+  </head>
+  <body>
+    <h1>Upload an Image for Parkinson Disease Detection</h1>
+    <input type="file" id="imageUpload" accept="image/*" />
+    <button onclick="uploadImage()">Upload</button>
+    <p id="result"></p>
+
+    <script>
+      function uploadImage() {
+        const fileInput = document.getElementById("imageUpload");
+        const file = fileInput.files[0];
+        const reader = new FileReader();
+
+        reader.onloadend = function () {
+          const base64String = reader.result;
+          fetch("/predict", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ image: base64String }),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              document.getElementById("result").innerText =
+                "Prediction: " + data.prediction;
+            })
+            .catch((error) => {
+              document.getElementById("result").innerText = "Error: " + error;
+            });
+        };
+
+        reader.readAsDataURL(file);
+      }
+    </script>
+  </body>
+</html>
